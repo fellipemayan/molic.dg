@@ -46,6 +46,16 @@
 	--secondary: var(--neutral-200);
 	--secondary-hover: var(--neutral-300);
 	--secondary-text: var(--neutral-700);
+
+	--text-success: oklch(0.5 0.15 140);
+	--text-error: oklch(0.5 0.22 31);
+	--bg-success: oklch(from var(--text-success) calc(l + 0.5) calc(c - 0.12) h);
+	--bg-error: oklch(from var(--text-error) calc(l + 0.5) calc(c - 0.13) h);
+
+	--and-color: oklch(0.6 0.2 260);
+	--seq-color: oklch(0.6 0.2 296);
+	--xor-color: oklch(0.6 0.2 8);
+	--or-color: oklch(0.7 0.2 39);
 }
 
 :root.dark {
@@ -78,6 +88,16 @@
 	--secondary: var(--neutral-800);
 	--secondary-hover: var(--neutral-700);
 	--secondary-text: var(--neutral-300);
+
+	--text-success: oklch(0.9 0.1 140);
+	--text-error: oklch(0.9 0.15 31);
+	--bg-success: oklch(from var(--text-success) calc(l - 0.6) calc(c - 0.05) h);
+	--bg-error: oklch(from var(--text-error) calc(l - 0.6) calc(c - 0.05) h);
+
+	--and-color: oklch(0.94 0.2 260);
+	--seq-color: oklch(0.94 0.2 296);
+	--xor-color: oklch(0.94 0.2 8);
+	--or-color: oklch(0.94 0.2 39);
 }
 
 * {
@@ -108,23 +128,6 @@ html,
 	display: flex;
 	flex-direction: column;
 	height: var(--app-height, 100vh);
-}
-
-.header {
-	height: var(--header-height);
-	background: var(--bg-base);
-	color: var(--text-base);
-	display: flex;
-	align-items: center;
-	padding: 0 1rem;
-	border-bottom: 1px solid var(--border-alt);
-	z-index: 1000;
-	position: relative;
-}
-
-header h1 {
-	font-size: 1.25rem;
-	font-weight: 600;
 }
 
 .workspace {

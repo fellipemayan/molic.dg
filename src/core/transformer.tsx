@@ -48,7 +48,7 @@ const getEdgeLabelJSX = (item: any, validationError?: string, overridePrefix?: s
   const whenText = type === "event" ? trigger : when;
   if (whenText) {
     lines.push(
-      <div key="when" className="molic-edge-label-line meta" style={{ fontWeight: 600, color: '#d48806' }}>
+      <div key="when" className="molic-edge-label-line meta">
         when: {whenText}
       </div>
     );

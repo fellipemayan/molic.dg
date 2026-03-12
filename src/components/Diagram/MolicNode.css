@@ -93,16 +93,16 @@
 
 /* Cores dos Fluxos */
 .molic-flow.seq {
-	border-left: 3px solid #8c8c8c;
+	border-left: 3px solid var(--seq-color);
 }
 .molic-flow.xor {
-	border-left: 3px solid #69c0ff;
+	border-left: 3px solid var(--xor-color);
 }
 .molic-flow.or {
-	border-left: 3px solid #95de64;
+	border-left: 3px solid var(--or-color);
 }
 .molic-flow.and:not(.default-layer) {
-	border-left: 3px solid #ffadd2;
+	border-left: 3px solid var(--and-color);
 }
 
 .molic-flow-label {

@@ -30,7 +30,7 @@ Seu código é salvo automaticamente no navegador. Não se preocupe em perder se
 Vamos criar um exemplo simples de um usuário fazendo login:
 
 ```
-start S {
+start Splash {
   u: "entrar" -> Login
 }
 
@@ -44,15 +44,15 @@ scene Login {
   u: "continuar" -> Auth
 }
 
-main scene Home {
-  topic: "Início"
-}
-
 process Auth {
   d: "credenciais corretas" -> Home
   d: "e-mail ou senha incorretos"
     if: ""
     ..> Login
+}
+
+main scene Home {
+  topic: "Início"
 }
 ```
 

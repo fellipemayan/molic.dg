@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { List } from '@phosphor-icons/react';
+import { ListIcon } from '@phosphor-icons/react';
 import { Header } from './Header/Header';
 import { DocumentationRenderer } from './Documentation/DocumentationRenderer';
 import { TableOfContents } from './Documentation/TableOfContents';
@@ -127,7 +127,7 @@ export function DocsPage() {
               }}
               title={showMobileIndex ? 'Fechar sumário' : 'Abrir sumário'}
             >
-              <List size={20} weight="bold" />
+              <ListIcon size={20} weight="bold" />
             </button>
 
             {/* Menu de sumário à esquerda */}

@@ -39,12 +39,12 @@
 
 /* --- Tratamento de Erros nos Rótulos --- */
 .molic-edge-label-container.error {
-	border: 1px solid #ff0000;
-	background-color: #fff0f0;
+	border: 1px solid var(--color-error);
+	background-color: var(--color-error);
 }
 
 .error-text {
-	color: #cc0000;
+	color: var(--color-error);
 	font-weight: bold;
 }
 
@@ -57,7 +57,7 @@
 
 /* Aresta Inválida (Vermelha e pontilhada) */
 .react-flow__edge.invalid-edge .react-flow__edge-path {
-	stroke: #ff0000 !important;
+	stroke: var(--color-error) !important;
 	stroke-dasharray: 2, 2 !important;
 	stroke-width: 2px;
 }

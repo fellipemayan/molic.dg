@@ -17,7 +17,7 @@
 	background-color: var(--bg-base);
 	border-right: 1px solid var(--border-base);
 	overflow-y: auto;
-	padding: 20px 0;
+	padding-top: 24px;
 	flex-shrink: 0;
 	display: flex;
 	flex-direction: column;
@@ -62,11 +62,18 @@
 		color: var(--text-heading);
 		font-weight: 600;
 	}
+
+	&:last-child {
+		margin-bottom: 16px;
+	}
 }
 
 .sidebar-content-index {
 	flex: 1;
 	overflow-y: auto;
+	padding-top: 16px;
+
+	scrollbar-color: var(--text-base) transparent;
 }
 
 .docs-content {
@@ -264,6 +271,8 @@
 		border-left: none;
 		border-radius: 0;
 		overflow-y: visible;
+
+		
 	}
 
 	.docs-mobile-summary-menu .table-of-contents.inline {
@@ -273,7 +282,7 @@
 		padding: 0;
 		background-color: transparent;
 		border-left: none;
-		border-radius: 0;
+		border-radius: 0;		
 	}
 
 	@keyframes slideInLeft {

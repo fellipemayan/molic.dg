@@ -135,6 +135,13 @@ export function DocumentationRenderer({ elements }: DocumentationRendererProps) 
         }
       
       case 'list':
+        if (element.ordered) {
+          return (
+            <ol key={index} className="doc-list doc-ordered-list">
+              {element.children?.map((child, i) => renderElement(child, i)) || []}
+            </ol>
+          );
+        }
         return (
           <ul key={index} className="doc-list">
             {element.children?.map((child, i) => renderElement(child, i)) || []}
@@ -146,6 +153,13 @@ export function DocumentationRenderer({ elements }: DocumentationRendererProps) 
           <li key={index} className="doc-listitem">
             {renderInlineContent(element.content || '')}
           </li>
+        );
+      
+      case 'link':
+        return (
+          <a key={index} href={element.href} className="doc-link" target="_blank" rel="noopener noreferrer">
+            {element.content}
+          </a>
         );
       
       case 'alert':
@@ -169,11 +183,46 @@ export function DocumentationRenderer({ elements }: DocumentationRendererProps) 
   }
 
   function renderInlineContent(text: string): React.ReactNode {
-    // Processar em ordem: `code` -> **bold** -> *italic* -> links
-    // Processar code primeiro para evitar que regex de bold/italic interfira com conteúdo de código
+    // Processar em ordem: links -> `code` -> **bold** -> *italic*
+    // Links precisam ser processados primeiro para não serem afetados por outros formatadores
     let elements: (string | React.ReactElement)[] = [text];
+    let keyCounter = 0;
 
-    // `code inline` - processar primeiro
+    // [texto](url) - links PRIMEIRO
+    elements = elements.flatMap((el) => {
+      if (typeof el !== 'string') return [el];
+      
+      const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+      const parts: (string | React.ReactElement)[] = [];
+      let lastIndex = 0;
+      let match;
+
+      while ((match = linkRegex.exec(el)) !== null) {
+        if (match.index > lastIndex) {
+          parts.push(el.slice(lastIndex, match.index));
+        }
+        parts.push(
+          <a
+            key={`link-${keyCounter++}`}
+            href={match[2]}
+            className="doc-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {match[1]}
+          </a>
+        );
+        lastIndex = linkRegex.lastIndex;
+      }
+
+      if (lastIndex < el.length) {
+        parts.push(el.slice(lastIndex));
+      }
+
+      return parts.length > 0 ? parts : [el];
+    });
+
+    // `code inline` - segundo
     elements = elements.flatMap((el) => {
       if (typeof el !== 'string') return [el];
       
@@ -187,7 +236,7 @@ export function DocumentationRenderer({ elements }: DocumentationRendererProps) 
           parts.push(el.slice(lastIndex, match.index));
         }
         parts.push(
-          <code key={match.index} className="doc-inline-code">
+          <code key={`code-${keyCounter++}`} className="doc-inline-code">
             {match[1]}
           </code>
         );
@@ -215,7 +264,7 @@ export function DocumentationRenderer({ elements }: DocumentationRendererProps) 
           parts.push(el.slice(lastIndex, match.index));
         }
         parts.push(
-          <strong key={match.index}>{match[1] || match[2]}</strong>
+          <strong key={`bold-${keyCounter++}`}>{match[1] || match[2]}</strong>
         );
         lastIndex = boldRegex.lastIndex;
       }
@@ -241,7 +290,7 @@ export function DocumentationRenderer({ elements }: DocumentationRendererProps) 
           parts.push(el.slice(lastIndex, match.index));
         }
         parts.push(
-          <em key={match.index}>{match[1] || match[2]}</em>
+          <em key={`italic-${keyCounter++}`}>{match[1] || match[2]}</em>
         );
         lastIndex = italicRegex.lastIndex;
       }

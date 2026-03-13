@@ -19,6 +19,7 @@ export interface DocumentElement {
 	level?: number; // Para headings
 	language?: string; // Para codeblocks
 	href?: string; // Para links
+	ordered?: boolean; // Para listas ordenadas
 	alertType?: "info" | "warning" | "success" | "error"; // Para alerts
 }
 

@@ -54,6 +54,10 @@
 .toc-item {
 	margin: 8px 0;
 	list-style: none;
+
+	&:last-child {
+		margin-bottom: 32px !important;
+	}
 }
 
 .table-of-contents.inline .toc-item {

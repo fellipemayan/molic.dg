@@ -104,7 +104,26 @@ export function parseMarkdown(content: string): DocumentElement[] {
 				i++;
 			}
 		}
-		// Lists
+		// Ordered lists (1. 2. 3.)
+		else if (/^\d+\.\s/.test(trimmed)) {
+			const listItems: DocumentElement[] = [];
+
+			while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
+				const itemContent = lines[i].trim().replace(/^\d+\.\s+/, "");
+				listItems.push({
+					type: "listitem",
+					content: parseInlineElements(itemContent),
+				});
+				i++;
+			}
+
+			elements.push({
+				type: "list",
+				children: listItems,
+				ordered: true,
+			});
+		}
+		// Unordered lists (- or *)
 		else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
 			const listItems: DocumentElement[] = [];
 
@@ -139,7 +158,8 @@ export function parseMarkdown(content: string): DocumentElement[] {
 				!lines[i].trim().startsWith("```") &&
 				!lines[i].trim().startsWith(">") &&
 				!lines[i].trim().startsWith("-") &&
-				!lines[i].trim().startsWith("*")
+				!lines[i].trim().startsWith("*") &&
+				!/^\d+\.\s/.test(lines[i].trim())
 			) {
 				paragraph += " " + lines[i].trim();
 				i++;
@@ -156,8 +176,13 @@ export function parseMarkdown(content: string): DocumentElement[] {
 }
 
 function parseInlineElements(text: string): string {
-	// Por enquanto, apenas retorna o texto como-é
-	// Futuramente, pode adicionar suporte a **bold**, *italic*, `code`, etc.
+	// Função que mantém compatibilidade com o renderizador
+	// O renderizador (DocumentationRenderer) faz o parsing de:
+	// - **bold**, __bold__
+	// - *italic*, _italic_
+	// - `code inline`
+	// - [texto](url)
+	// Aqui apenas retornamos o texto para processamento posterior
 	return text;
 }
 

@@ -8,7 +8,7 @@ import { documentationContent } from '../docs/content';
 import { useIsMobile } from '../hooks/useIsMobile';
 import './DocsPage.css';
 
-type DocPageId = 'getting-started' | 'syntax-concepts' | 'api-reference' | 'recipes';
+type DocPageId = 'getting-started' | 'syntax-concepts' | 'recipes';
 
 interface DocPageInfo {
   id: DocPageId;
@@ -26,11 +26,6 @@ const docPages: DocPageInfo[] = [
     id: 'syntax-concepts',
     title: 'Sintaxe & Conceitos',
     slug: 'syntax-concepts'
-  },
-  {
-    id: 'api-reference',
-    title: 'Referência de API',
-    slug: 'api-reference'
   },
   {
     id: 'recipes',

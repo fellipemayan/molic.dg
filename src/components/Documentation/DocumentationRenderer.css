@@ -1,45 +1,36 @@
 .documentation-renderer {
-	/* max-width: 1024px; */
-	margin: 0;
-	padding: 0;
 	color: var(--text-base);
-	font-family:
-		-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-		"Ubuntu", "Cantarell", sans-serif;
 	line-height: 1.5;
 	flex: 1;
 }
 
 /* Headings */
 .doc-h1 {
-	font-size: 2.5rem;
+	font-size: 2rem;
 	font-weight: 600;
-	margin: 0 0 24px 0;
+	margin-top: 24px;
 	color: var(--text-heading);
-	border-bottom: 2px solid var(--border-muted);
-	padding-bottom: 10px;
+	border-bottom: 1px solid var(--border-muted);
 }
 
 .doc-h2 {
-	font-size: 2rem;
+	font-size: 1.75rem;
 	font-weight: 600;
-	margin: 30px 0 16px 0;
+	margin-block: 48px 16px;
 	color: var(--text-heading);
-	margin-top: 40px;
 }
 
 .doc-h3 {
 	font-size: 1.5rem;
 	font-weight: 500;
-	margin: 24px 0 16px 0;
+	margin-block: 40px 16px;
 	color: var(--text-heading);
-	margin-top: 32px;
 }
 
 .doc-h4 {
 	font-size: 1.2rem;
 	font-weight: 500;
-	margin: 16px 0 8px 0;
+	margin-block: 32px 8px;
 	color: var(--text-heading);
 }
 
@@ -53,9 +44,11 @@
 /* Inline Code */
 .doc-inline-code {
 	color: var(--text-base);
+	background-color: var(--bg-alt);
 	padding: 2px 6px;
-	border-radius: 3px;
-	font-family: "Geist Mono", "Monaco", "Courier New", monospace;
+	border-radius: 4px;
+	margin: 0 2px;
+	font-family: "JetBrains Mono", "Fira Code", Consolas, monospace, Consolas, "Courier New", monospace;
 	font-size: 0.9em;
 }
 
@@ -73,9 +66,10 @@
 /* Code Blocks */
 .doc-codeblock-wrapper {
 	margin: 24px 0;
-	/* border-radius: 6px; */
 	overflow: hidden;
 	background-color: var(--bg-base);
+	border: 1px solid var(--border-base);
+	border-radius: 12px;
 }
 
 .doc-codeblock-header {
@@ -83,7 +77,6 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: 8px;
-	border: 1px solid var(--border-base);
 	border-bottom: 1px solid var(--border-base);
 	border-radius: 12px 12px 0 0;
 	gap: 12px;
@@ -93,7 +86,7 @@
 	font-size: 0.75rem;
 	font-weight: 600;
 	color: var(--text-muted);
-	font-family: "Geist Mono", "Monaco", "Courier New", monospace;
+	font-family: "JetBrains Mono", "Fira Code", Consolas, monospace, Consolas, "Courier New", monospace;
 	letter-spacing: 0.5px;
 	text-transform: lowercase;
 	background-color: var(--bg-alt);
@@ -119,8 +112,6 @@
 	color: var(--text-base);
 	cursor: pointer;
 	transition: all 0.2s ease;
-	font-family:
-		-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
 }
 
 .doc-code-btn:hover {
@@ -153,33 +144,33 @@
 	border: none;
 	padding: 16px;
 	overflow-x: auto;
-	margin: 0;
-	font-family: "Geist Mono", "Monaco", "Courier New", monospace;
-	font-size: 0.9rem;
+	font-family: "JetBrains Mono", "Fira Code", Consolas, monospace, Consolas, "Courier New", monospace;
 	line-height: 1.4;
 	color: var(--text-base);
-	border-radius: 0 0 12px 12px;
+
+	scrollbar-color: var(--text-base) transparent;
 }
 
 .doc-codeblock code {
-	font-family: inherit;
+	font-size: 0.9rem;
 	background: none;
 }
 
 /* Syntax Highlighting for MoLIC code blocks - HIGH SPECIFICITY */
 .doc-codeblock code .syntax-keyword-clause {
-	color: #6a9955;
+	color: #4ec9b0;
 	font-weight: 600;
 }
 
 .doc-codeblock code .syntax-keyword-struct {
-	color: #ff7a5c;
+	color: #c586c0;
 	font-weight: 600;
 }
 
 .doc-codeblock code .syntax-keyword-flow {
 	color: #ce9178;
-	font-weight: 600;
+	/* font-weight: 600; */
+	font-style: italic;
 }
 
 .doc-codeblock code .syntax-keyword-speaker {
@@ -188,7 +179,7 @@
 }
 
 .doc-codeblock code .syntax-keyword {
-	color: #f44747;
+	color: #c586c0;
 	font-weight: 600;
 }
 
@@ -219,12 +210,12 @@
 }
 
 .doc-codeblock code .syntax-bracket {
-	color: #d4d4d4;
+	color: #ffd700;
 }
 
 /* Diagram code blocks */
 .doc-diagram-code .syntax-keyword-clause {
-	color: #6a9955;
+	color: #4ec9b0;
 	font-weight: 600;
 }
 
@@ -235,7 +226,8 @@
 
 .doc-diagram-code .syntax-keyword-flow {
 	color: #ce9178;
-	font-weight: 600;
+	/* font-weight: 600; */
+	font-style: italic;
 }
 
 .doc-diagram-code .syntax-keyword-speaker {
@@ -390,19 +382,45 @@
 	list-style: disc;
 }
 
+.doc-ordered-list {
+	list-style: decimal;
+}
+
 .doc-listitem {
 	margin: 8px 0;
 	color: var(--text-base);
 }
 
+/* Links */
+.doc-link {
+	color: var(--primary);
+	text-decoration: none;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border-bottom: 1px solid transparent;
+}
+
+.doc-link:hover {
+	text-decoration: underline;
+	color: var(--primary-hover);
+}
+
+.doc-link:active {
+	color: var(--primary-dark);
+}
+
 /* Alerts */
 .doc-alert {
 	display: flex;
-	padding: 15px;
+	padding: 16px;
 	margin: 20px 0;
 	border-radius: 6px;
 	border-left: 4px solid;
 	background-color: var(--bg-secondary);
+
+	& .doc-inline-code {
+		background-color: rgba(0, 0, 0, 0.1);
+	}
 }
 
 .alert-info {

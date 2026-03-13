@@ -2,28 +2,25 @@
 
 ## O que é o MoLIC?
 
-**MoLIC** (Modelagem de Ligações Lógicas em Interação com o Computador) é uma notação visual poderosa para especificar e modelar cenários de interação em sistemas computacionais. Diferente de outras abordagens tradicionais, MoLIC oferece uma representação clara das conversações entre usuários e sistemas.
+**MoLIC** (Modeling Language for Interaction as Conversation, ou Linguagem para a Modelagem da Interação como uma Conversa) é uma notação da interação como um conjunto de conversas que usuários travam com um sistema para atingir seus objetivos. Além de ferramenta de notação, a MoLIC é uma *ferramenta epistêmica*, ou seja, que funciona para que designers obtenham uma maior compreensão sobre o artefato a ser desenvolvido.
 
-### Principais Características
+Concebida por Maria Greco de Paula, Bruno Santana da Silva e Simone Diniz Junqueira Barbosa, a MoLIC é um método da Engenharia Semiótica. Expressa na forma de um diagrama, a MoLIC representa cenários e modelos de tarefa, aproximando os objetivos dos usuários com o projeto de interface. 
 
-- **Notação clara e intuitiva** para representar fluxos de interação
-- **Suporte para decisões e bifurcações** de fluxo
-- **Representação de falas e ações** de usuários e sistema
-- **Metadata rica** para documentação e racionalização de decisões
-- **Exportação para múltiplos formatos** (SVG, PDF)
+## MoLIC.dg
+O **MoLIC.dg** é uma ferramenta para criação de diagramas MoLIC por meio de código de linguagem própria, baseada na versão 4 do método, proposta na dissertação de [Caroline Loppi Guimarães](https://bdtd.ibict.br/vufind/Record/PUC_RIO-1_799e34e4185a6fd3745ca7aaca3b7702).
 
-## Instalação e Uso
+O fluxo de funcionamento segue três etapas principais:
 
-### Como usar o MoLIC.dg
+1. **A Linguagem (DSL)**: Você escreve o fluxo interativo usando a sintaxe MoLIC no painel de edição. 
+2. **Análise Léxica e Sintática (Parsing)**: Assim que você pausa a digitação, o parser lê o seu texto, valida as regras da gramática e o transforma em uma Árvore de Sintaxe Abstrata (AST).
+3. **Renderização Visual**: A AST é então convertida dinamicamente em nós e arestas. O diagrama é desenhado na tela com layout automático, permitindo zoom, navegação e a visualização clara de todos os caminhos conversacionais.
 
-1. **Abra a aplicação** - Você já está aqui! 🎉
-2. **Comece a digitar** no bloco de código à esquerda
-3. **Veja o diagrama** atualizar em tempo real à direita
-4. **Exporte seu trabalho** usando o botão "Export" no topo
-
-### Salvamento Automático
-
-Seu código é salvo automaticamente no navegador. Não se preocupe em perder seu trabalho!
+### Principais funcionalidades  
+- **Live preview inteligente**: O diagrama é atualizado em tempo real enquanto você digita, otimizado para não travar a sua tela durante a formulação das expressões.
+- **Componentes ricos**: Suporte visual nativo para todos os elementos da MoLIC V4, incluindo terminais de início/fim, cenas com tópicos, contextos globais, forks, processos de sistema e agentes externos.
+- **Arestas semânticas**: As falas (utterances) não são apenas setas; elas carregam metadados valiosos como condições (`if`), gatilhos (`when`), justificativas de design (`why`) e efeitos sistêmicos (`effect`), todos renderizados diretamente na interface.
+- **Salvamento automático**: O seu código é salvo automaticamente no navegador. Não se preocupe em perder seu trabalho!
+- **Exportação/Importação de diagrama**: 
 
 ## Seu Primeiro Diagrama
 

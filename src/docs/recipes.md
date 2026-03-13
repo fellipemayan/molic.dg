@@ -1,272 +1,137 @@
-# Exemplos Práticos (Recipes)
+# Exemplos Práticos 
 
-Aqui você encontrará exemplos completos e prontos para usar em seus próprios projetos!
+Aqui você encontrará exemplos completos e prontos para usar em seus próprios projetos. Você pode clicar em "Experimentar" para copiar os códigos para o editor.
 
-## 1. Autenticação Completa
+## Autenticação Completa
 
 Um fluxo típico de login e registro:
 
 ```
-start: SistemaAutenticacao
+start SistemaAutenticacao {
+  u: "entrar no app" -> Inicio
+}
 
-scene Inicial
-  d: Usuário visualiza página de boas-vindas
-  u: Cliquei em "Entrar"
-  -> Login
+scene Inicio {
+  topic: "Página inicial"
+  preferred u: "entrar" -> Login
+  u: "criar conta" -> Registro
+}
 
-scene Login
-  d: Exibe formulário de login
-  u: Digitei email e senha
-  system: Enviando credenciais...
+scene Login {
+  topic: "Login"
 
-  if: Login bem-sucedido?
-    d: Usuário autenticado
-    -> Dashboard
-  else:
-    d: Erro nas credenciais
-    u: Recebi mensagem de erro
-    when: Desejo tentar novamente?
-      -> Login
-    when: Desejo me registrar?
-      -> Registro
+  or {
+    subtopic: "Escolher modo de autenticação"
+    du: "nome, email, senha" if: "formulário"
+    du: "conta Google" if: "entrar com Google"
+    du: "conta Github" if: "entrar com GitHub"
+  }
 
-scene Registro
-  d: Exibe formulário de registro
-  u: Preenchi formulário com dados
-  system: Validando dados...
+  preferred u: "entrar" -> Dashboard
+  d: "dados incorretos" if: "" ..> Login
+}
 
-  if: Email já existe?
-    -> Registro
-  else:
-    system: Conta criada com sucesso!
-    -> Dashboard
+scene Registro {
+  topic: "Registro de conta"
 
-scene Dashboard
-  d: Painel principal com dados do usuário
-  u: Navegando pelo aplicativo
-  u: Cliquei em "Sair"
-  -> Logout
+  or {
+    subtopic: "Escolher modo de autenticação"
+    du: "nome, email, senha" if: "formulário"
+    du: "conta Google" if: "Google"
+    du: "conta Github" if: "GitHub"
+  }
 
-scene Logout
-  system: Limpando sessão...
-  d: Redirecionando para página inicial
-  -> Inicial
+  u: "criar conta" -> Login
+}
+
+main scene Dashboard {}
+
+global Glob {
+  u: "sair" -> Fim
+}
+
+end Fim 
 ```
 
-## 2. Carrinho de Compras
+## Carrinho de Compras
 
 Fluxo completo de um e-commerce:
 
 ```
-start: Loja
+start Loja {
+  u: "ver itens" -> Catalogo
+}
 
-scene Catalogo
-  d: Produtos são exibidos em grid
-  u: Cliquei em um produto
-  -> DetalhesProduto
+scene Catalogo {
+  topic: "Catálogo"
 
-scene DetalhesProduto
-  d: Imagens e descrição do produto
-  u: Selecionei quantidade e cor
+  u: "ver produto" -> DetalhesProduto
+}
 
-  when: Adicionei ao carrinho?
-    system: Produto adicionado!
-    -> Catalogo
-  when: Comprei agora?
-    -> Carrinho
+scene DetalhesProduto {
+  topic: "Detalhes do produto"
+  
+  and {
+    subtopic: "Adicionar item ao carrinho"
+    u: "quantidade, cor"
+    u: "adicionar ao carrinho"
+    d: "adicionado ao carrinho" if: "item no estoque"
+  }
 
-scene Carrinho
-  d: Listando itens do carrinho
+  d: "item fora de estoque" if: "" -> DetalhesProduto
+  u: "ver carrinho" -> Carrinho
+}
 
-  let: total = 399.90
-  let: qtdItens = 3
+scene Carrinho {
+  topic: "Carrinho"
+  let: "total = 349.99"
+  let: "qtdItens = 4"
 
-  u: Revisando itens
+  xor {
+    d: "carrinho vazio" if: "qtdItens == 0"
+    d: "itens adicionados" if: "qtdItens > 0"
+  }
 
-  if: Carrinho vazio?
-    -> Catalogo
-  else:
-    u: Prossegui para checkout
-    -> Endereco
+  u: "finalizar compra" -> Endereco
+}
 
-scene Endereco
-  d: Formulário de endereço de entrega
-  u: Selecionei endereço salvo
+scene Endereco {
+  topic: "Dados de endereço para entrega"
 
-  if: Endereço válido?
-    system: Endereço confirmado
-    -> Pagamento
-  else:
-    -> Endereco
+  or {
+    subtopic: "Adicionar endereço"
+    du: "endereço salvo" if: "enderecoSalvo"
+    du: "CEP, logradouro, número, referência, bairro, cidade, estado"
+  }
 
-scene Pagamento
-  external: Gateway de pagamento (Stripe/Square)
-  d: Integrando com processador
-  u: Selecionei método de pagamento
+  d: "endereço inválido" if: "" -> Endereco
+  u: "avançar" -> TelaPagamento
+}
+scene TelaPagamento {
+  topic: "Dados de pagamento"
 
-  if: Pagamento aprovado?
-    -> Confirmacao
-  else:
-    d: Pagamento recusado
-    u: Tentei novamente
-    -> Pagamento
+  seq {
+    subtopic: "Escolher dados de pagamento"
+      du: "escolher(1, lista(boleto, Pix, crédito, débito))" 
+      du: "número de parcelas" if: "crédito"
+  }
 
-scene Confirmacao
-  d: Número do pedido gerado
-  system: Email de confirmação enviado
-  effect: Inventário atualizado e pedido criado
-  u: Cliquei em "Voltar à loja"
-  -> Catalogo
+  u: "avançar" -> Pagamento
+}
+
+process Pagamento {
+  d: "problema no pagamento" ..> TelaPagamento
+  d: "pagamento processado" -> Confirmacao
+}
+
+scene Confirmacao {
+  topic: "Confirmação de pagamento"
+
+  u: "voltar à loja" -> Catalogo
+} 
 ```
 
-## 3. Assistente (Wizard) Passo-a-Passo
-
-Um formulário multipassos para coleta de dados:
-
-```
-start: FormularioInscrição
-
-scene BemVindo
-  d: Exibe mensagem de boas-vindas
-  d: "Vamos completar seu perfil em 4 passos"
-  u: Cliquei em "Começar"
-  -> Passo1
-
-scene Passo1
-  d: "Passo 1/4: Dados Pessoais"
-  d: Formulário com nome e email
-  u: Preenchí os dados
-
-  if: Dados válidos?
-    system: Dados salvos!
-    -> Passo2
-  else:
-    -> Passo1
-
-scene Passo2
-  d: "Passo 2/4: Endereço"
-  d: Formulário com endereço
-  u: Preenchí o endereço
-
-  topic: Validação
-    system: Verificando CEP...
-
-  if: Endereço válido?
-    system: Endereço confirmado
-    -> Passo3
-  else:
-    system: CEP inválido, tente novamente
-    -> Passo2
-
-scene Passo3
-  d: "Passo 3/4: Preferências"
-  d: Checkboxes e seletores
-  u: Selecionei minhas preferências
-  system: Preferências salvas
-  -> Passo4
-
-scene Passo4
-  d: "Passo 4/4: Revisão Final"
-  d: Resumo de todos os dados coletados
-  u: Revisei meus dados
-
-  when: Dados corretos?
-    u: Cliquei em "Finalizar"
-    -> Conclusao
-  when: Preciso editar?
-    u: Retornei ao passo anterior
-    -> Passo3
-
-scene Conclusao
-  system: Inscrição completada com sucesso!
-  d: Email de confirmação enviado
-  effect: Usuário é adicionado ao banco de dados
-  u: Fui redirecionado ao dashboard
-  -> end
-```
-
-## 4. Sistema de Suporte com Escalonamento
-
-Suporte técnico com histórico e escalação:
-
-```
-start: SuporteTecnico
-
-scene MenuSuporte
-  d: Menu inicial com opções
-  u: Selecionei "Abrir Ticket"
-  -> CriarTicket
-
-scene CriarTicket
-  d: Formulário para novo ticket
-  u: Descrevi meu problema
-  system: Ticket #12345 criado
-  -> AnalisaTicket
-
-scene AnalisaTicket
-  process: IA analisa o problema
-
-  when: Problema é comum?
-    -> SolucaoAutomatica
-  when: Problema é complexo?
-    -> EscalacaoAgente
-
-scene SolucaoAutomatica
-  d: Sugestões baseadas em IA
-  let: confidence = 87%
-
-  when: Solução funcionou?
-    u: Problema resolvido!
-    -> TicketFechado
-  when: Preciso falar com humano?
-    -> EscalacaoAgente
-
-scene EscalacaoAgente
-  d: Conectando com próximo agente disponível...
-  system: Aguardando agente...
-
-  when: Agente disponível?
-    -> ChatAoVivo
-  when: Nenhum agente disponível?
-    -> Agendamento
-
-scene ChatAoVivo
-  contact: Agente de Suporte
-  u: Explicando meu problema
-
-  when: Problema resolvido?
-    -> TicketFechado
-  when: Preciso acompanhamento?
-    -> FollowUp
-
-scene Agendamento
-  d: Agendador de callback
-  u: Agendei uma ligação
-  effect: Email de confirmação é enviado
-  -> TicketEmAberto
-
-scene FollowUp
-  effect: Email será enviado em 24 horas
-  -> TicketEmAberto
-
-scene TicketEmAberto
-  d: Ticket está aberto e aguardando
-  u: Voltei mais tarde para acompanhamento
-  -> MenuSuporte
-
-scene TicketFechado
-  system: Ticket foi fechado
-  d: Avaliação de satisfação
-  u: Avaliei o atendimento
-  effect: Feedback é registrado
-  -> MenuSuporte
-```
-
-> [!info] Dica Profissional: Sempre defina variáveis com `let:` para rastrear estado importante. Use `effect:` para documentar ações que acontecem behind-the-scenes!
-
----
-
-## 5. Editor Completo (MoLIC.dg)
+## Editor Completo (MoLIC.dg)
 
 Um exemplo real e completo do fluxo de interação do próprio MoLIC.dg com múltiplos diálogos, cenas globais e controle de estado:
 
@@ -393,24 +258,17 @@ external Ext
 end Fim
 ```
 
-> [!success] Este é um exemplo real do próprio MoLIC.dg! Ele demonstra o uso de: **cenas globais** para ações sempre disponíveis, **preferências** para parsing automático, **múltiplos diálogos** com `and`, **bifurcações** com `or`, **transições para tipos diferentes de nós** (process, fork, external), e **salvamento automático** com `effect:`.
-
----
-
 ## Boas Práticas
 
-### ✓ Faça Sempre
+### Recomendações
+- Use nomes de cenas **descritivos** e usando **PascalCase**
+- **Documente decisões** com `why`
+- **Agrupe falas relacionadas** com `topic`
+- **Defina variáveis** que rastreiam estados importantes
 
-- Use nomes de cenas **descritivos** e **usando PascalCase**
-- **Documente decisões** com `why:`
-- **Agrupe falas relacionadas** com `topic:`
-- **Defina variáveis** que rastreiam estado importante
-
-### ✗ Evite
+### Evite
 
 - Nomes de cenas muito genéricos (`Tela1`, `Passo2`)
 - Cenas com lógica excessivamente complexa
 - Deixar transições sem contexto
 - Ignorar efeitos colaterais importantes
-
-Divirta-se modelando! 🎨

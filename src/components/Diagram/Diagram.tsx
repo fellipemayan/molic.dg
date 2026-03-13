@@ -16,7 +16,7 @@ import 'reactflow/dist/style.css';
 import { MolicNode } from './MolicNode';
 import { SimultaneousEdge, MolicEdge } from './MolicEdge';
 import { DiagramToolbar } from './DiagramToolbar';
-import { transformer } from '../../core/transformer';
+import { transformer, type LayoutDensity } from '../../core/transformer.tsx';
 import { parseMolic } from '../../core/parser';
 import { useLayoutPersistence } from '../../hooks/useLayoutPersistence';
 import { useUndoRedo } from '../../hooks/useUndoRedo';
@@ -42,6 +42,13 @@ interface DiagramContentProps {
   onNodesEdgesChange?: (nodes: RFNode[], edges: Edge[]) => void;
   reactFlowRef?: React.MutableRefObject<ReactFlowInstance<RFNode, Edge> | null>;
 }
+
+interface PersistedLayout {
+  nodes: Array<{ id: string; position: { x: number; y: number } }>;
+  edges: Array<{ id: string; sourceHandle?: string | null; targetHandle?: string | null }>;
+}
+
+const LAYOUT_DENSITY_KEY = 'molic-layout-density-v1';
 
 // Componente auxiliar para capturar a instância do ReactFlow
 const DiagramFlowController: React.FC<{ reactFlowRef: React.MutableRefObject<ReactFlowInstance<RFNode, Edge> | null> }> = ({ reactFlowRef }) => {
@@ -82,16 +89,64 @@ const DiagramContent: React.FC<DiagramContentProps> = ({ code, onNodesEdgesChang
     height: number;
   } | null>(null);
   const [isSelectingWithBox, setIsSelectingWithBox] = useState(false);
+  const [isAutoLayouting, setIsAutoLayouting] = useState(false);
+  const [layoutDensity, setLayoutDensity] = useState<LayoutDensity>(() => {
+    const value = localStorage.getItem(LAYOUT_DENSITY_KEY);
+    if (value === 'compact' || value === 'normal' || value === 'airy') return value;
+    return 'normal';
+  });
   const selectBoxRef = useRef<{ startX: number; startY: number } | null>(null);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   
-  const { saveLayout, applySavedLayout } = useLayoutPersistence();
+  const { saveLayout } = useLayoutPersistence();
   const edgeReconnectSuccessful = useRef(true);
   const edgeBackupRef = useRef<Edge[]>([]);
   const { setReconnecting, resetReconnecting } = useReconnectionContext();
 
   const onConnectStart: OnConnectStart = useCallback(() => setIsConnecting(true), []);
   const onConnectEnd: OnConnectEnd = useCallback(() => setIsConnecting(false), []);
+
+  const handleCycleDensity = useCallback(() => {
+    setLayoutDensity((prev) => {
+      const next: LayoutDensity = prev === 'compact' ? 'normal' : prev === 'normal' ? 'airy' : 'compact';
+      localStorage.setItem(LAYOUT_DENSITY_KEY, next);
+      return next;
+    });
+  }, []);
+
+  const loadPersistedLayout = useCallback(() => {
+    const savedString = localStorage.getItem('molic-layout-stable-v4');
+    if (!savedString) {
+      return {
+        fixedNodePositions: new Map<string, { x: number; y: number }>(),
+        savedHandlesMap: new Map<string, { sourceHandle: string; targetHandle: string }>(),
+      };
+    }
+
+    try {
+      const saved = JSON.parse(savedString) as PersistedLayout;
+      const fixedNodePositions = new Map(saved.nodes.map((node) => [node.id, node.position]));
+      const savedHandlesMap = new Map(
+        saved.edges
+          .filter((edge) => edge.sourceHandle && edge.targetHandle)
+          .map((edge) => [
+            edge.id,
+            {
+              sourceHandle: edge.sourceHandle as string,
+              targetHandle: edge.targetHandle as string,
+            },
+          ]),
+      );
+
+      return { fixedNodePositions, savedHandlesMap };
+    } catch (e) {
+      console.error('Erro ao carregar layout salvo', e);
+      return {
+        fixedNodePositions: new Map<string, { x: number; y: number }>(),
+        savedHandlesMap: new Map<string, { sourceHandle: string; targetHandle: string }>(),
+      };
+    }
+  }, []);
   
   // Handler para reconexão de edges
   const onReconnectStart = useCallback((_event: React.MouseEvent | React.TouchEvent, edge: Edge) => {
@@ -178,34 +233,80 @@ const DiagramContent: React.FC<DiagramContentProps> = ({ code, onNodesEdgesChang
     }
 
     if (ast) {
-      // Carregar handles salvos
-      const savedString = localStorage.getItem('molic-layout-stable-v4');
-      let savedHandlesMap: Map<string, { sourceHandle: string, targetHandle: string }> | undefined;
-      
-      if (savedString) {
-        try {
-          const saved = JSON.parse(savedString);
-          savedHandlesMap = new Map(
-            saved.edges
-              .filter((e: Edge) => e.sourceHandle && e.targetHandle)
-              .map((e: Edge) => [
-                e.id,
-                { sourceHandle: e.sourceHandle, targetHandle: e.targetHandle }
-              ])
-          );
-        } catch (e) {
-          console.error('Erro ao carregar handles salvos', e);
-        }
-      }
-      
-      const { nodes: layoutNodes, edges: layoutEdges } = transformer(ast, savedHandlesMap);
-      
-      // Aplicar layout salvo (positions)
-      const { nodes: finalNodes, edges: finalEdges } = applySavedLayout(layoutNodes, layoutEdges);
-      setNodes(finalNodes);
-      setEdges(finalEdges);
+      const { fixedNodePositions, savedHandlesMap } = loadPersistedLayout();
+      const allIds = ast.elements.map((element) => element.id);
+      const preservedCount = allIds.filter((id) => fixedNodePositions.has(id)).length;
+      const reuseRatio = allIds.length > 0 ? preservedCount / allIds.length : 0;
+      const shouldReuseFixedPositions = reuseRatio >= 0.6;
+
+      const effectiveFixedPositions = shouldReuseFixedPositions
+        ? fixedNodePositions
+        : new Map<string, { x: number; y: number }>();
+
+      const newNodeIds = new Set(allIds.filter((id) => !effectiveFixedPositions.has(id)));
+
+      const { nodes: layoutNodes, edges: layoutEdges } = transformer(ast, savedHandlesMap, {
+        fixedNodePositions: effectiveFixedPositions,
+        relayoutAllNodes: false,
+        relayoutEdgeNodeIds: newNodeIds,
+        density: layoutDensity,
+      });
+
+      setNodes(layoutNodes);
+      setEdges(layoutEdges);
     }
-  }, [code, setNodes, setEdges, applySavedLayout]);
+  }, [code, setNodes, setEdges, loadPersistedLayout, layoutDensity]);
+
+  const handleAutoLayout = useCallback(() => {
+    const { ast, error } = parseMolic(code);
+    if (error || !ast) {
+      console.warn('Não foi possível executar auto-layout: código inválido.');
+      return;
+    }
+
+    setIsAutoLayouting(true);
+    const { savedHandlesMap } = loadPersistedLayout();
+    const allNodeIds = new Set(ast.elements.map((element) => element.id));
+    const elementById = new Map(ast.elements.map((element) => [element.id, element]));
+    const sceneIdsLockedByProcess = new Set<string>();
+
+    ast.elements.forEach((element) => {
+      if (element.type !== 'process' || !element.content) return;
+      element.content.forEach((item: unknown) => {
+        const targetId =
+          typeof item === 'object' && item !== null && 'transition' in item
+            ? (item as { transition?: { targetId?: string } }).transition?.targetId
+            : undefined;
+        if (!targetId) return;
+        const targetElement = elementById.get(targetId);
+        if (targetElement?.type === 'scene') {
+          sceneIdsLockedByProcess.add(targetId);
+        }
+      });
+    });
+
+    const fixedNodePositions = new Map(
+      nodes
+        .filter((node) => sceneIdsLockedByProcess.has(node.id))
+        .map((node) => [node.id, { x: node.position.x, y: node.position.y }]),
+    );
+
+    const { nodes: layoutNodes, edges: layoutEdges } = transformer(ast, savedHandlesMap, {
+      relayoutAllNodes: true,
+      fixedNodePositions,
+      relayoutEdgeNodeIds: allNodeIds,
+      density: layoutDensity,
+    });
+
+    setNodes(layoutNodes);
+    setEdges(layoutEdges);
+    saveLayout(layoutNodes, layoutEdges);
+
+    setTimeout(() => {
+      reactFlowRef?.current?.fitView?.({ padding: 0.2, duration: 250 });
+      setIsAutoLayouting(false);
+    }, 0);
+  }, [code, loadPersistedLayout, nodes, reactFlowRef, saveLayout, setEdges, setNodes, layoutDensity]);
 
   // Keyboard shortcuts para Undo/Redo
   useEffect(() => {
@@ -342,6 +443,10 @@ const DiagramContent: React.FC<DiagramContentProps> = ({ code, onNodesEdgesChang
           canRedo={canRedo}
           onUndo={undo}
           onRedo={redo}
+          onAutoLayout={handleAutoLayout}
+          isAutoLayouting={isAutoLayouting}
+          layoutDensity={layoutDensity}
+          onCycleDensity={handleCycleDensity}
         />
         {selectionBox && (
           <div

@@ -3,11 +3,16 @@ import { useReactFlow } from 'reactflow';
 import {
   ArrowUUpLeftIcon,
   ArrowUUpRightIcon,
+  ArrowsClockwiseIcon,
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
   ArrowsOutIcon,
   CaretDownIcon,
+  ArrowsInLineVerticalIcon,
+  SplitVerticalIcon,
+  ArrowsOutLineVerticalIcon,
 } from '@phosphor-icons/react';
+import type { LayoutDensity } from '../../core/transformer.tsx';
 import './DiagramToolbar.css';
 
 interface DiagramToolbarProps {
@@ -15,6 +20,10 @@ interface DiagramToolbarProps {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  onAutoLayout: () => void;
+  isAutoLayouting: boolean;
+  layoutDensity: LayoutDensity;
+  onCycleDensity: () => void;
 }
 
 const ZOOM_PRESETS = [50, 75, 100, 125, 150, 200, 300];
@@ -24,6 +33,10 @@ export const DiagramToolbar: React.FC<DiagramToolbarProps> = ({
   canRedo,
   onUndo,
   onRedo,
+  onAutoLayout,
+  isAutoLayouting,
+  layoutDensity,
+  onCycleDensity,
 }) => {
   const reactFlow = useReactFlow();
   const [zoom, setZoom] = useState(100);
@@ -120,6 +133,14 @@ export const DiagramToolbar: React.FC<DiagramToolbarProps> = ({
     setTimeout(updateZoomDisplay, 300);
   }, [reactFlow, updateZoomDisplay]);
 
+  const densityLabel = layoutDensity === 'compact' ? 'Compacto' : layoutDensity === 'normal' ? 'Normal' : 'Distante';
+  const densityTitle = `Densidade: ${densityLabel}`;
+  const densityIcon = layoutDensity === 'compact'
+    ? <ArrowsInLineVerticalIcon size={16} weight="bold" />
+    : layoutDensity === 'normal'
+      ? <SplitVerticalIcon size={16} weight="bold" />
+      : <ArrowsOutLineVerticalIcon size={16} weight="bold" />;
+
   return (
     <div className="diagram-toolbar" data-toolbar="true">
       <div className="toolbar-group">
@@ -164,6 +185,32 @@ export const DiagramToolbar: React.FC<DiagramToolbarProps> = ({
           onClick={handleFitView}
         >
           <ArrowsOutIcon size={18} weight="regular" />
+        </button>
+      </div>
+
+      <div className="toolbar-divider" />
+
+      <div className="toolbar-group">
+        <button
+          className="toolbar-btn"
+          title="Auto-layout"
+          onClick={onAutoLayout}
+          disabled={isAutoLayouting}
+        >
+          <ArrowsClockwiseIcon size={18} weight="regular" />
+        </button>
+      </div>
+
+      {/* <div className="toolbar-divider" /> */}
+
+      <div className="toolbar-group">
+        <button
+          className="toolbar-btn density-btn"
+          title={densityTitle}
+          onClick={onCycleDensity}
+        >
+          {densityIcon}
+          <span>{densityLabel}</span>
         </button>
       </div>
 

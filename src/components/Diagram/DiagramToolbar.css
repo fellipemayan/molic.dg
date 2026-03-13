@@ -68,6 +68,14 @@
 	cursor: not-allowed;
 }
 
+.toolbar-btn.density-btn {
+	width: auto;
+	padding: 0 10px;
+	gap: 6px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
 /* Grupo de zoom com input customizado e dropdown */
 .zoom-control-wrapper {
 	position: relative;
@@ -192,5 +200,20 @@
 		top: 16px;
 		left: 50%;
 		transform: translateX(-50%);
+	}
+
+	.zoom-input {
+		width: 38px;
+		padding: 0 4px;
+	}
+
+	.toolbar-btn.density-btn {
+		width: 32px;
+		padding: 0;
+		gap: 0;
+	}
+
+	.toolbar-btn.density-btn span {
+		display: none;
 	}
 }

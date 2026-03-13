@@ -476,10 +476,6 @@
 		font-size: 1.2rem;
 	}
 
-	.doc-codeblock {
-		font-size: 0.8rem;
-		padding: 12px;
-	}
 
 	.doc-codeblock-header {
 		flex-direction: column;

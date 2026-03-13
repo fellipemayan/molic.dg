@@ -1,4 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
+
 :root {
+	--font-sans:
+		"Geist",
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		sans-serif;
+	--font-heading:
+		"Space Grotesk",
+		"Geist",
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		sans-serif;
+	--font-mono:
+		"JetBrains Mono",
+		"Fira Code",
+		Consolas,
+		"Courier New",
+		monospace;
+	--font-inline-code:
+		"Space Mono",
+		"JetBrains Mono",
+		"Fira Code",
+		Consolas,
+		"Courier New",
+		monospace;
+
 	--neutral-0: oklch(1 0 0);
 	--neutral-50: oklch(0.985 0 0);
 	--neutral-100: oklch(0.97 0 0);
@@ -112,16 +141,27 @@ html,
 	height: 100%;
 	width: 100%;
 	overflow: hidden;
-	font-family:
-		"Geist",
-		-apple-system,
-		BlinkMacSystemFont,
-		"Segoe UI",
-		sans-serif;
+	font-family: var(--font-sans);
 	color: var(--text-base);
 	transition:
 		background-color 0.3s ease,
 		color 0.3s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: var(--font-heading);
+}
+
+code,
+kbd,
+samp,
+pre {
+	font-family: var(--font-mono);
 }
 
 .app-container {

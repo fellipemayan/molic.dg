@@ -25,6 +25,7 @@
 
 .sidebar-title {
 	font-size: 0.85rem;
+	font-family: var(--font-heading);
 	margin: 0 0 8px 0;
 	color: var(--text-muted);
 	text-transform: uppercase;
@@ -216,6 +217,7 @@
 	.docs-mobile-summary-menu .sidebar-title {
 		font-size: 1.1rem;
 		font-weight: 600;
+		font-family: var(--font-heading);
 		padding: 0 20px;
 		margin: 0 0 15px 0;
 		color: var(--text-base);
